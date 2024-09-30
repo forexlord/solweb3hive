@@ -25,10 +25,14 @@ export default function Footer({ isDarkMode }: FooterProps) {
         />
       </div>
       <div>
-        <p className="text-center text-white">
+        <p
+          className={`text-center ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
           Sol3hive provides all the tools and insights you need to succeed in
-          Web3 and Solana, <br />from real-time market updates to advanced development
-          resources.
+          Web3 and Solana, <br />
+          from real-time market updates to advanced development resources.
         </p>
       </div>
     </div>

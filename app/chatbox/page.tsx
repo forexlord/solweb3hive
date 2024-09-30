@@ -100,7 +100,40 @@ const ChatPage = () => {
                 />
               </div>
             </div>
-            {/* Repeat the above card structure for the other items */}
+
+            <div className="border border-[#F4F5F7] p-5 rounded-lg flex flex-col justify-between">
+              <p>Web3 Education & Support</p>
+              <div className="flex justify-end">
+                <Image src="/assets/Frame 90 (1).png"
+                alt=""
+                width={30}
+                height={30}
+                />
+              </div>
+            </div>
+
+            <div className="border border-[#F4F5F7] p-5 rounded-lg flex flex-col justify-between">
+              <p>Project Ideation & Competitor Analysis</p>
+              <div className="flex justify-end">
+                <Image src="/assets/Frame 90 (2).png"
+                alt=""
+                width={30}
+                height={30}
+                />
+              </div>
+            </div>
+
+            <div className="border border-[#F4F5F7] p-5 rounded-lg flex flex-col justify-between">
+              <p>Market Updates & Analysis</p>
+              <div className="flex justify-end">
+                <Image src="/assets/Frame 90 (3).png"
+                alt=""
+                width={30}
+                height={30}
+                />
+              </div>
+            </div>
+            
           </div>
 
           <div className="flex items-center justify-between p-4 rounded-lg border border-[#F4F5F7]">

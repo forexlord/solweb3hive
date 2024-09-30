@@ -180,6 +180,9 @@ function Home() {
   const handleLoginClick = () => {
     router.push("/login");
   };
+  const handleSignUpClick = () => {
+    router.push("/signup");
+  };
   return (
     <div className="bg-black h-screen text-white text-center flex flex-col justify-center items-center">
       <div>
@@ -189,7 +192,7 @@ function Home() {
         <p className="text-[20px]">Your Ultimate Web3 and Solana Companion</p>
         <div className="flex flex-col items-center justify-center gap-5 pt-5">
           <Button label="Login" onClick={handleLoginClick} />
-          <Button label="SignUp" />
+          <Button label="SignUp" onClick={handleSignUpClick} />
           <Button label="Continue As Guest" />
         </div>
       </div>

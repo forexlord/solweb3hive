@@ -1,14 +1,14 @@
-'use client'; // Enable client-side rendering
+'use client'; 
 
 import React from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
+import { useRouter } from "next/navigation"; 
 
 const SignUp = () => {
-  const router = useRouter(); // Initialize router
+  const router = useRouter(); 
 
   return (
-    <div className="bg-[#202227] pt-20 h-fit w-full text-[20px] text-white flex flex-col items-center justify-center">
+    <div className="bg-[#202227] py-20 h-fit w-full text-[20px] text-white flex flex-col items-center justify-center">
       <div className="w-full max-w-[600px] px-4">
         <p className="text-center pb-3 text-[24px] text-[#E1FF01]">
           Sign Up for an Account
@@ -18,7 +18,7 @@ const SignUp = () => {
         </p>
 
         <form action="" className="flex flex-col gap-5">
-          {/* First Name and Last Name */}
+          
           <div className="flex flex-col md:flex-row gap-5">
             <div className="flex flex-col gap-3 w-full">
               <label htmlFor="firstName">First Name</label>
