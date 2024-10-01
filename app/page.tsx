@@ -23,7 +23,7 @@
 //         isDarkMode ? "bg-black" : "bg-[#fcfdfd]"
 //       }`}
 //     >
-      
+
 //       <div className={`flex justify-between items-center px-5 sticky inset-8 lg:px-20 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
 //         <div>
 //           <Image
@@ -38,9 +38,8 @@
 //           />
 //         </div>
 
-        
 //         <div className="flex gap-5 items-center">
-          
+
 //           <div
 //             className={`hidden md:flex gap-2 text-[${
 //               isDarkMode ? "#DFDBDB" : "#A3A3A3"
@@ -70,9 +69,8 @@
 //             )}
 //           </div>
 
-          
 //           <div className="flex gap-3 items-center">
-            
+
 //             <Image
 //               src={
 //                 isDarkMode ? "/assets/Frame 4.svg" : "/assets/Frame 14 (1).svg"
@@ -84,7 +82,6 @@
 //               className="cursor-pointer"
 //             />
 
-            
 //             <button
 //               onClick={toggleNav}
 //               className="block md:hidden p-2 z-50"
@@ -106,13 +103,12 @@
 //           </div>
 //         </div>
 
-        
 //         <div
 //           className={`fixed top-0 right-0 h-screen  w-3/4 bg-white dark:bg-black transform transition-transform duration-500 ease-in-out ${
 //             isNavOpen ? "translate-x-0" : "translate-x-full"
 //           } md:hidden flex flex-col items-center justify-center`}
 //         >
-          
+
 //           <div className="flex flex-col gap-6 text-lg font-semibold text-center">
 //             {["Home", "Feature", "Premium", "How it Works", "About Us"].map(
 //               (link) => (
@@ -121,7 +117,7 @@
 //                   href="#"
 //                   onClick={() => {
 //                     setActiveLink(link);
-//                     setIsNavOpen(false); 
+//                     setIsNavOpen(false);
 //                   }}
 //                   className={`px-4 py-2 rounded-full transition-colors duration-300 ${
 //                     activeLink === link
@@ -140,7 +136,6 @@
 //           </div>
 //         </div>
 //       </div>
-    
 
 //       <div
 //         className={`flex items-center justify-center w-full flex-col text-center pt-20 ${
@@ -168,11 +163,10 @@
 //     </div>
 //   );
 // }
-"use client"
+"use client";
 import React from "react";
 import Button from "./Components/Button";
 import { useRouter } from "next/navigation";
-
 
 function Home() {
   const router = useRouter();
@@ -201,4 +195,3 @@ function Home() {
 }
 
 export default Home;
-
