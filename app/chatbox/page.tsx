@@ -4,6 +4,32 @@ import Image from "next/image";
 
 const ChatPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [prompt, setPrompt] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const data = await res.json();
+      setResponse(data.result || 'No result found.');
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setResponse('Error fetching data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   
   const toggleSidebar = () => {
@@ -100,6 +126,7 @@ const ChatPage = () => {
                 />
               </div>
             </div>
+            {response && <p>Response: {response}</p>}
             {/* Repeat the above card structure for the other items */}
           </div>
 
@@ -114,11 +141,13 @@ const ChatPage = () => {
               <input
                 type="text"
                 placeholder="Enter Prompt"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
                 className="bg-transparent text-white w-full outline-none px-2"
               />
             </div>
-            <button className="bg-[#E1FF01] text-black px-6 py-2 rounded-lg flex items-center gap-2">
-              Send
+            <button className="bg-[#E1FF01] text-black px-6 py-2 rounded-lg flex items-center gap-2" onClick={handleSubmit}>
+            {loading ? 'Loading...' : 'send'}
               <Image
                 src="/assets/Vector (4).png"
                 alt="send"
