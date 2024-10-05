@@ -14,7 +14,7 @@ const SignUp = () => {
           Sign Up for an Account
         </p>
         <p className="pb-5 text-center">
-          Let's get you all set up so you can experience Sol3Hive
+          Let&#39;s get you all set up so you can experience Sol3Hive
         </p>
 
         <form action="" className="flex flex-col gap-5">
