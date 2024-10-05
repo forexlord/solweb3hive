@@ -1,11 +1,76 @@
-"use client"
+"use client";
 
 import React from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/user";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import Swal from "sweetalert2";
 
 const Login = () => {
-  const router = useRouter(); 
+  const router = useRouter();
+
+  const setUser = useUserStore((state) => state.setUser);
+  const user = useUserStore((state) => state.user);
+
+  const registerSchema = Yup.object().shape({
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email address is required"),
+    password: Yup.string().required("Password is required"),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: registerSchema,
+    onSubmit: (values, { setSubmitting, resetForm }) => {
+      fetch("/api/login", {
+        method: "POST",
+        body: JSON.stringify(values),
+      })
+        .then(async (res) => {
+          const data = await res.json();
+          if (res.ok) {
+            Swal.fire({
+              title: "Success!",
+              text: "Login Successful",
+              icon: "success",
+              confirmButtonText: "Ok",
+            });
+            console.log("data.user", data?.user);
+            setUser(data?.user);
+            router.push("/dashboard");
+            resetForm();
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: data?.error || "Login failed, please try again",
+              icon: "error",
+              confirmButtonText: "Ok",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          Swal.fire({
+            title: "Error!",
+            text: error || "Login failed, please try again",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        })
+        .finally(() => setSubmitting(false));
+      return;
+    },
+  });
+
+  if (user) {
+    router.push("/dashboard");
+  }
 
   return (
     <div className="bg-[#202227] h-screen w-full text-[20px] text-white flex flex-col items-center justify-center">
@@ -23,7 +88,15 @@ const Login = () => {
               placeholder="example@example.com"
               id="email"
               className="bg-transparent border-[0.5px] w-full py-3 px-5 rounded-[8px] text-white"
+              name="email"
+              defaultValue={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
             />
+            {formik.touched.email && formik.errors.email ? (
+              <p className="text-red-500 text-sm">{formik.errors.email}</p>
+            ) : null}
           </div>
 
           {/* Password Field */}
@@ -34,7 +107,15 @@ const Login = () => {
               placeholder="Password"
               id="password"
               className="bg-transparent border-[0.5px] w-full py-3 px-5 rounded-[8px] text-white"
+              name="password"
+              defaultValue={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
             />
+            {formik.touched.password && formik.errors.password ? (
+              <p className="text-red-500 text-sm">{formik.errors.password}</p>
+            ) : null}
           </div>
 
           {/* Forgot Password */}
@@ -47,8 +128,10 @@ const Login = () => {
           {/* Sign In Button */}
           <div>
             <button
-              type="button"
+              type="submit"
               className="bg-[#DCF331] text-black w-full p-3 rounded-[8px]"
+              onClick={(e) => formik.handleSubmit()}
+              disabled={formik.isSubmitting}
             >
               Sign In
             </button>
@@ -65,7 +148,7 @@ const Login = () => {
           <div className="flex justify-end pt-5">
             <p
               className="underline underline-offset-2 text-[#F4F5F7] cursor-pointer"
-              onClick={() => router.push("/signup")} 
+              onClick={() => router.push("/signup")}
             >
               Create Account
             </p>
