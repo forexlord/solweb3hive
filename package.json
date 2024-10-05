@@ -15,6 +15,7 @@
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.95.3",
+    "@types/bcrypt": "^5.0.2",
     "add": "^2.0.6",
     "antd": "^5.21.2",
     "bcrypt": "^5.1.1",
