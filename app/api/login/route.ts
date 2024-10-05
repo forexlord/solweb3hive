@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { password: _, ...user } = userExists;
+    console.log(_);
 
     return NextResponse.json({ message: "Login successful", user });
   } catch (error) {

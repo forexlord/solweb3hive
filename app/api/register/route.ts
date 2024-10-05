@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
     });
 
     const { password: _, ..._user } = user;
+    console.log(_);
 
     return NextResponse.json({
       message: "Registration successful",
