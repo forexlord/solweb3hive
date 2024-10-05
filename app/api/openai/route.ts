@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 // API route handler
 export async function POST(req: NextRequest) {
   try {
-    let { prompt, chatId } = await req.json();
+    const { prompt, chatId } = await req.json();
 
     if (!prompt) {
       return NextResponse.json(
