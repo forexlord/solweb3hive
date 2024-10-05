@@ -48,7 +48,7 @@ const ChatPage = () => {
   }, []);
 
   const handleAddNewChat = async () => {
-    const newChat = await fetch("/api/chat/create", {
+    const newChat = await fetch("/api/create-chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
