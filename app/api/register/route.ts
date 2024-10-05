@@ -33,9 +33,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    delete user.password;
+    const { password: _, ..._user } = user;
 
-    return NextResponse.json({ message: "Registration successful", user });
+    return NextResponse.json({
+      message: "Registration successful",
+      user: _user,
+    });
   } catch (error) {
     console.error("Error with OpenAI request:", error);
     return NextResponse.json(

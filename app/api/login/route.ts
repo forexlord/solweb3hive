@@ -46,9 +46,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    delete userExists.password;
+    const { password: _, ...user } = userExists;
 
-    return NextResponse.json({ message: "Login successful", user: userExists });
+    return NextResponse.json({ message: "Login successful", user });
   } catch (error) {
     console.error("Error with OpenAI request:", error);
     return NextResponse.json(
