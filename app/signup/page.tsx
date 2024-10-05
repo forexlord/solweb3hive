@@ -93,7 +93,7 @@ const SignUp = () => {
           Sign Up for an Account
         </p>
         <p className="pb-5 text-center">
-          Let's get you all set up so you can experience Sol3Hive
+          Let&apos;s get you all set up so you can experience Sol3Hive
         </p>
 
         <form action="" className="flex flex-col gap-5">
@@ -209,7 +209,7 @@ const SignUp = () => {
             <button
               type="submit"
               className="bg-[#DCF331] text-black w-full p-3 rounded-[8px]"
-              onClick={(e) => formik.handleSubmit()}
+              onClick={() => formik.handleSubmit()}
               disabled={formik.isSubmitting}
             >
               Sign Up

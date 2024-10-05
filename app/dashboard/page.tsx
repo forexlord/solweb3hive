@@ -47,21 +47,13 @@ const Dashboard = () => {
     router.push("/login");
   };
   const { setVisible: setModalVisible } = useWalletModal();
-  const [copied, setCopied] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
-  const {
-    buttonState,
-    onConnect,
-    onDisconnect,
-    publicKey,
-    walletIcon,
-    walletName,
-  } = useWalletMultiButton({
-    onSelectWallet() {
-      setModalVisible(true);
-    },
-  });
+  const { buttonState, onConnect, onDisconnect, publicKey, walletIcon } =
+    useWalletMultiButton({
+      onSelectWallet() {
+        setModalVisible(true);
+      },
+    });
 
   const Menu = () => {
     const handleMenuClick: MenuProps["onClick"] = (e) => {

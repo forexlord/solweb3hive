@@ -130,7 +130,7 @@ const Login = () => {
             <button
               type="submit"
               className="bg-[#DCF331] text-black w-full p-3 rounded-[8px]"
-              onClick={(e) => formik.handleSubmit()}
+              onClick={() => formik.handleSubmit()}
               disabled={formik.isSubmitting}
             >
               Sign In
