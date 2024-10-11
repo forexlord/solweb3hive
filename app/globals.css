@@ -211,15 +211,6 @@ body {
     font-size: 1.2rem;
   }
 }
-.profile-page .content__button {
-  margin: 3rem 0 2rem;
-  text-align: center;
-}
-@media (max-width: 990px) {
-  .profile-page .content__button {
-    margin: 1.5rem 0 2.2rem;
-  }
-}
 .profile-page .content__button .button {
   display: inline-block;
   padding: 1.2rem 1.8rem;

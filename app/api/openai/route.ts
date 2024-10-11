@@ -42,7 +42,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ result: "This is response>>", chatId });
+    return NextResponse.json({
+      result:
+        "Hello, and welcome to the future of decentralized finance and development! In this session, we're diving into how AI can enhance your Web3 experience, particularly on the Solana network. AI is transforming the way we interact with blockchain technologies, from automating complex smart contracts to offering personalized insights and improving user experience with decentralized applications (dApps). Whether you're looking to streamline your payment systems, analyze trends, or simply tip with ease, AI offers powerful tools to help you navigate the Solana ecosystem more efficiently. Stay tuned as we explore how AI and Web3 are combining to unlock new possibilities, including seamless crypto payments, enhanced user engagement, and more!",
+      chatId,
+    });
   } catch (error) {
     console.error("Error with OpenAI request:", error);
     return NextResponse.json(
