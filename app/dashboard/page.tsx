@@ -359,6 +359,7 @@ const Wallet = ({ children }: { children: React.ReactNode }) => {
         : WalletAdapterNetwork.Testnet,
     [process.env.NODE_ENV]
   );
+  console.log("Network>>>", network);
 
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
