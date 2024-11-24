@@ -6,6 +6,9 @@ import { IChat, useChatStore } from "@/store/chat";
 import { Drawer } from "antd";
 import { MdMenu } from "react-icons/md";
 import { CgClose } from "react-icons/cg";
+import { getChats, createChat, sendMessage } from "@/app/actions/chat";
+
+
 
 const ChatPage = () => {
   const user = useUserStore((state) => state.user);
@@ -27,18 +30,20 @@ const ChatPage = () => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userId: user?.id }),
-        });
-
-        const data = await res.json();
-        setChats(data.chats || []);
-        setMessages(data.chats?.[0]?.messages || []);
-        setSelectedChat(data.chats?.[0]);
+        const data = await getChats(user?.id || "");
+        const formattedChats = data.chats?.map(chat => ({
+          ...chat,
+          createdAt: new Date(chat.createdAt).toISOString(),
+          updatedAt: new Date(chat.updatedAt).toISOString(),
+          messages: chat.messages?.map(msg => ({
+            ...msg,
+            createdAt: new Date(msg.createdAt).toISOString(),
+            updatedAt: new Date(msg.updatedAt).toISOString(),
+          }))
+        }));
+        setChats(formattedChats || []);
+        setMessages(formattedChats?.[0]?.messages || []);
+        setSelectedChat(formattedChats?.[0]);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -48,20 +53,17 @@ const ChatPage = () => {
   }, []);
 
   const handleAddNewChat = async () => {
-    const newChat = await fetch("/api/chat/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: user?.id }),
-    });
-
-    const data = await newChat.json();
-    addChat(data.chat);
-    setSelectedChat(data.chat);
-    setMessages(data.chat?.messages || []);
-
-    return data.chat;
+    const data = await createChat(user?.id || "");
+    const newChat = {
+        ...data.chat,
+        messages: [],
+        createdAt: new Date(data.chat.createdAt).toISOString(),
+        updatedAt: new Date(data.chat.updatedAt).toISOString()
+    };
+    addChat(newChat);
+    setSelectedChat(newChat);
+    setMessages([]);
+    return newChat;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,32 +76,26 @@ const ChatPage = () => {
         const newChat = await handleAddNewChat();
         chatId = newChat.id;
       }
+      
       addMessage({
         type: "prompt",
         content: prompt,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         chatId: chatId || "",
+        id: chatId || "",
       });
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      const res = await fetch("/api/openai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt,
-          chatId,
-        }),
-      });
-
-      const data = await res.json();
+      
+      const data = await sendMessage(prompt, chatId || "");
+      
       addMessage({
         type: "response",
         content: data?.result || "No response, try again",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         chatId: chatId || "",
+        id: data?.chatId || "",
       });
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     } catch (error) {

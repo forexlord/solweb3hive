@@ -1,13 +1,15 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export interface ChatMessage {
-  type: "prompt" | "response";
-  id?: string;
+
+
+interface ChatMessage {
+  id: string;
   content: string;
+  type: string;
+  chatId: string;
   createdAt: string;
   updatedAt: string;
-  chatId: string;
 }
 
 export interface IChat {
