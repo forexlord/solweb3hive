@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../lib/prisma";
 
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
 export async function PUT(req: NextRequest) {
   try {
     const { userId, data } = await req.json();
