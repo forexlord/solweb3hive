@@ -62,7 +62,7 @@ export function FeaturesSection({ isDarkMode }: { isDarkMode: boolean }) {
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl font-bold mb-4">
-                        Explore what's <span className="italic">included</span>
+                        Explore what&apos;s <span className="italic">included</span>
                     </h2>
                     <p className={`${isDarkMode ? 'text-[#DFDBDB]' : 'text-[#A3A3A3]'}`}>
                         Unlock Powerful Insights and Resources for Every Step of Your Journey

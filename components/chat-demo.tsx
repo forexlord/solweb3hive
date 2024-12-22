@@ -23,12 +23,12 @@ export function ChatDemo({ isDarkMode }: ChatDemoProps) {
                             />
                         </div>
                         <p className={`p-3 rounded-lg ${isDarkMode ? 'bg-black text-[#F4F5F7]' : 'bg-white text-[#1A1A1A]'}`}>
-                            Hi buddy! I'm here to help you to get started with building a project.
+                            Hi buddy! I&apos;m here to help you to get started with building a project.
                         </p>
                     </div>
                     <div className="flex items-start gap-3 justify-end">
                         <p className={`p-3 rounded-lg ${isDarkMode ? 'bg-black text-[#F4F5F7]' : 'bg-white text-[#1A1A1A]'}`}>
-                            Hello! I'd like to set up my development environment. Do you have guidance on setting up with web3.js?
+                            Hello! I&apos;d like to set up my development environment. Do you have guidance on setting up with web3.js?
                         </p>
                         <div className="w-8 h-8 rounded-full bg-[#DCF331] flex items-center justify-center">
                             <span className="text-sm">👤</span>

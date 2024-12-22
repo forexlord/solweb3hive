@@ -13,14 +13,14 @@ export function AIAdvisor({ isDarkMode }: { isDarkMode: boolean }) {
                             </div>
                             <div className={`p-4 rounded-xl ${isDarkMode ? 'bg-black' : 'bg-white'} max-w-[80%]`}>
                                 <p className={isDarkMode ? 'text-white' : 'text-black'}>
-                                    Hi buddy! I'm here to help you to get started with building a project.
+                                    Hi buddy! I&apos;m here to help you to get started with building a project.
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-start gap-4 justify-end">
                             <div className={`p-4 rounded-xl ${isDarkMode ? 'bg-black' : 'bg-white'} max-w-[80%]`}>
                                 <p className={isDarkMode ? 'text-white' : 'text-black'}>
-                                    Hello! I'd like to set up my development environment. Do you have guidance on setting up with web3.js?
+                                    Hello! I&apos;d like to set up my development environment. Do you have guidance on setting up with web3.js?
                                 </p>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-[#E1FF01] flex items-center justify-center flex-shrink-0">
