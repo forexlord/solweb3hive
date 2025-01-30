@@ -1,18 +1,23 @@
 "use client"; // Enable client-side rendering
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
 import Swal from "sweetalert2";
 import { useFormik } from "formik";
 import { useUserStore } from "@/store/user";
 import * as Yup from "yup";
+import { useChatStore } from "@/store/chat";
 
 const SignUp = () => {
   const router = useRouter(); // Initialize router
 
   const setUser = useUserStore((state) => state.setUser);
   const user = useUserStore((state) => state.user);
+  const setAnonymousMessages = useChatStore(
+    (state) => state.setAnonymousMessages
+  );
+  const [initialized, setInitialized] = useState(false);
 
   const registerSchema = Yup.object().shape({
     email: Yup.string()
@@ -56,16 +61,17 @@ const SignUp = () => {
         .then(async (res) => {
           const data = await res.json();
           if (res.ok) {
+            setUser(data?.user);
+            setAnonymousMessages([]);
             Swal.fire({
               title: "Success!",
               text: `Registration Successful!`,
               icon: "success",
               confirmButtonText: "Ok",
+            }).then(() => {
+              router.push("/dashboard");
+              resetForm();
             });
-            console.log("data.user", data?.user);
-            setUser(data?.user);
-            router.push("/dashboard");
-            resetForm();
           } else {
             Swal.fire({
               title: "Error!",
@@ -81,9 +87,11 @@ const SignUp = () => {
       return;
     },
   });
-  console.log("User>>", user);
-  if (user) {
+
+  if (user && !initialized) {
     router.push("/dashboard");
+  } else {
+    setInitialized(true);
   }
 
   return (

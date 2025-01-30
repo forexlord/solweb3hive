@@ -31,22 +31,24 @@ export async function POST(req: NextRequest) {
 
     const aiResponse = await response.json();
 
-    await prisma.message.create({
-      data: {
-        type: "prompt",
-        content: prompt,
-        chatId,
-      },
-    });
+    if (chatId) {
+      await prisma.message.create({
+        data: {
+          type: "prompt",
+          content: prompt,
+          chatId,
+        },
+      });
 
-    await prisma.message.create({
-      data: {
-        type: "response",
-        content:
-          aiResponse.response || aiResponse.message || "No response received",
-        chatId,
-      },
-    });
+      await prisma.message.create({
+        data: {
+          type: "response",
+          content:
+            aiResponse.response || aiResponse.message || "No response received",
+          chatId,
+        },
+      });
+    }
 
     return NextResponse.json({
       result:

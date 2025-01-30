@@ -10,6 +10,14 @@ export interface ChatMessage {
   chatId: string;
 }
 
+export interface AnonymousChatMessage {
+  type: "prompt" | "response";
+  id?: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IChat {
   id?: string;
   createdAt: string;
@@ -25,6 +33,9 @@ interface ChatStore {
   messages: ChatMessage[];
   setMessages: (messages: ChatMessage[]) => void;
   addMessage: (message: ChatMessage) => void;
+  anonymousMessages: AnonymousChatMessage[];
+  setAnonymousMessages: (messages: AnonymousChatMessage[]) => void;
+  addAnonymousMessage: (message: AnonymousChatMessage) => void;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -44,6 +55,13 @@ export const useChatStore = create<ChatStore>()(
               ? { ...chat, messages: [...(chat?.messages || []), message] }
               : chat
           ),
+        })),
+      anonymousMessages: [],
+      setAnonymousMessages: (messages: AnonymousChatMessage[]) =>
+        set({ anonymousMessages: messages }),
+      addAnonymousMessage: (message: AnonymousChatMessage) =>
+        set((state) => ({
+          anonymousMessages: [...state.anonymousMessages, message],
         })),
     }),
     { name: "chats", storage: createJSONStorage(() => sessionStorage) }

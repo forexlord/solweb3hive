@@ -7,15 +7,27 @@ import { Drawer, Spin } from "antd";
 import { MdDelete, MdMenu } from "react-icons/md";
 import { CgClose } from "react-icons/cg";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
+import Messages from "./Messages";
 
 const ChatPage = () => {
+  const router = useRouter();
+
   const user = useUserStore((state) => state.user);
   const chats = useChatStore((state) => state.chats);
+  const addChat = useChatStore((state) => state.addChat);
   const setChats = useChatStore((state) => state.setChats);
   const setMessages = useChatStore((state) => state.setMessages);
-  const addChat = useChatStore((state) => state.addChat);
   const addMessage = useChatStore((state) => state.addMessage);
   const messages = useChatStore((state) => state.messages);
+  // anonymous
+  const setAnonymousMessages = useChatStore(
+    (state) => state.setAnonymousMessages
+  );
+  const addAnonymousMessage = useChatStore(
+    (state) => state.addAnonymousMessage
+  );
+  const anonymousMessages = useChatStore((state) => state.anonymousMessages);
   const [isLoading, setIsLoading] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -51,6 +63,18 @@ const ChatPage = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    setTimeout(() => {
+      bottomRef?.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    if (messages.length) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages.length]);
+
   const handleAddNewChat = async () => {
     setIsLoading(true);
     const newChat = await fetch("/api/create-chat", {
@@ -69,24 +93,36 @@ const ChatPage = () => {
     return data.chat;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setLoading(true);
 
     try {
+      setPrompt("");
       let chatId = selectedChat?.id;
-      if (!selectedChat && chats.length <= 0) {
-        const newChat = await handleAddNewChat();
-        chatId = newChat.id;
+      if (user) {
+        if (!selectedChat && chats.length <= 0) {
+          const newChat = await handleAddNewChat();
+          chatId = newChat.id;
+        }
+        addMessage({
+          type: "prompt",
+          content: prompt,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          chatId: chatId || "",
+        });
+      } else {
+        addAnonymousMessage({
+          type: "prompt",
+          content: prompt,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
       }
-      addMessage({
-        type: "prompt",
-        content: prompt,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        chatId: chatId || "",
-      });
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 0);
       const res = await fetch("/api/prompt", {
         method: "POST",
         headers: {
@@ -99,26 +135,31 @@ const ChatPage = () => {
       });
 
       const data = await res.json();
-      addMessage({
-        type: "response",
-        content: data?.result || "No response, try again",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        chatId: chatId || "",
-      });
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      if (user) {
+        addMessage({
+          type: "response",
+          content: data?.result || "No response, try again",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          chatId: chatId || "",
+        });
+      } else {
+        addAnonymousMessage({
+          type: "response",
+          content: data?.result || "No response, try again",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 0);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (messages.length) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages.length]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
@@ -178,9 +219,53 @@ const ChatPage = () => {
     });
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && prompt.trim().length > 0) {
+      event.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  const handleClearAnonymousMessages = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setMessages([]);
+        setAnonymousMessages([]);
+      }
+    });
+  };
+
   return (
     <Spin spinning={isLoading}>
-      <div className="bg-black h-screen w-full flex flex-row items-center justify-center text-white">
+      {!user ? (
+        <div className="bg-black w-full h-[70px] flex flex-row gap-4 items-center justify-end">
+          <button
+            onClick={() => router.push("/login")}
+            className="text-white hover:bg-[#E1FF01] hover:text-black px-4 py-2 rounded-3xl font-semibold border-2 border-[#E1FF01] transition-all "
+          >
+            Login
+          </button>
+          <button
+            onClick={() => router.push("/signup")}
+            className="hover:text-white bg-[#E1FF01] text-black px-4 py-2 rounded-3xl font-semibold hover:bg-black border-2 border-[#E1FF01] transition-all mr-4"
+          >
+            Sign up
+          </button>
+        </div>
+      ) : null}
+      <div
+        className={`bg-black ${
+          user ? "h-screen" : "h-[calc(100vh-70px)]"
+        } w-full flex flex-row items-center justify-center text-white`}
+      >
         <Drawer
           title="Select Chat"
           onClose={hideSidebar}
@@ -220,25 +305,42 @@ const ChatPage = () => {
             <p>No chats available</p>
           )}
         </Drawer>
+
         <aside
-          className={`top-0 left-0 h-full w-[120px] bg-black flex flex-col justify-between items-center`}
+          className={`top-0 left-0 h-full w-[80px] bg-black flex flex-col justify-between items-center`}
         >
           <div className="my-4 flex flex-col gap-10">
-            <button onClick={toggleSidebar}>
-              {isSidebarOpen ? (
-                <CgClose size="1.6rem" />
-              ) : (
-                <MdMenu size="1.6rem" />
-              )}
-            </button>
-            <button onClick={handleAddNewChat}>
-              <Image
-                src="/assets/Frame 4.png"
-                alt="Frame 4"
-                width={40}
-                height={40}
-              />
-            </button>
+            {user ? (
+              <>
+                <button
+                  className="flex items-center justify-center"
+                  onClick={toggleSidebar}
+                >
+                  {isSidebarOpen ? (
+                    <CgClose size="1.8rem" />
+                  ) : (
+                    <MdMenu size="1.8rem" />
+                  )}
+                </button>
+                <button onClick={handleAddNewChat}>
+                  <Image
+                    src="/assets/Frame 4.png"
+                    alt="Frame 4"
+                    width={40}
+                    height={40}
+                  />
+                </button>
+              </>
+            ) : (
+              <button onClick={handleClearAnonymousMessages}>
+                <Image
+                  src="/assets/Frame 4.png"
+                  alt="Frame 4"
+                  width={40}
+                  height={40}
+                />
+              </button>
+            )}
           </div>
 
           <div className="flex flex-col">
@@ -270,24 +372,33 @@ const ChatPage = () => {
         </aside>
 
         {/* Main Content */}
-        <div className="flex flex-col h-full justify-end w-full px-4 mx-auto">
-          {messages.length <= 0 && (
+        <div className="flex flex-col h-full justify-end w-[calc(100%-80px)] mx-3 overflow-hidden">
+          {user && messages.length <= 0 ? (
             <div className="pt-20">
               <h1 className="text-[40px] font-bold">
                 <span className="text-[#E1FF01]">Hello,</span> {user?.firstName}
               </h1>
               <p className="text-[24px] mb-10">What would you like me to do?</p>
             </div>
-          )}
+          ) : anonymousMessages.length <= 0 ? (
+            <div className="pt-20">
+              <h1 className="text-[40px] font-bold">
+                <span className="text-[#E1FF01]">Hello,</span> Anonymous
+              </h1>
+              <p className="text-[24px] mb-10">What would you like me to do?</p>
+            </div>
+          ) : null}
 
-          <div className="flex flex-col gap-10 w-full">
-            <div
-              className={`flex flex-col gap-4 text-[16px] ${
-                messages.length && "max-h-[70vh]"
-              } w-full overflow-y-scroll px-4`}
-            >
-              {/* Example cards */}
-              {/* <div className="border border-[#F4F5F7] p-5 rounded-lg flex flex-col justify-between">
+          <div className="flex flex-col gap-10 w-full mb-4 max-h-full">
+            {user ? (
+              messages.length ? (
+                <div
+                  className={`flex flex-col gap-4 text-[16px] ${
+                    messages.length && "max-h-[70vh]"
+                  } w-full overflow-y-scroll no_scrollbar`}
+                >
+                  {/* Example cards */}
+                  {/* <div className="border border-[#F4F5F7] p-5 rounded-lg flex flex-col justify-between">
                 <p>Solana-Focused Development Resources</p>
                 <div className="flex justify-end">
                   <Image
@@ -299,37 +410,43 @@ const ChatPage = () => {
                 </div>
               </div> */}
 
-              <div className="flex flex-col gap-3 w-full chatbody">
-                {messages.map((message, index) => (
                   <div
-                    key={index}
-                    className={`${
-                      message.type === "prompt"
-                        ? "bg-[#F4F5F7] text-black w-[50%] self-end"
-                        : "bg-[#E1FF01] text-black w-[50%] self-start"
-                    } p-5 rounded-lg`}
+                    className="flex flex-col gap-3 w-full chatbody"
+                    ref={bottomRef}
                   >
-                    <p>{message.content}</p>
+                    <Messages messages={messages} />
                   </div>
-                ))}
+                </div>
+              ) : null
+            ) : anonymousMessages.length ? (
+              <div
+                className={`flex flex-col gap-4 text-[16px] ${
+                  messages.length && "max-h-[70vh]"
+                } w-full overflow-y-scroll no_scrollbar`}
+              >
+                <div
+                  className="flex flex-col gap-3 w-full chatbody"
+                  ref={bottomRef}
+                >
+                  <Messages messages={anonymousMessages} />
+                </div>
               </div>
-              <div ref={bottomRef} />
-            </div>
+            ) : null}
 
             <div className="flex items-center justify-between p-4 rounded-lg border border-[#F4F5F7]">
-              <div className="flex items-center">
+              <div className="flex items-center w-full">
                 <Image
                   src="/assets/emoji-smile_svgrepo.com.png"
                   alt="emoji"
                   width={30}
                   height={30}
                 />
-                <input
-                  type="text"
+                <textarea
                   placeholder="Enter Prompt"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="bg-transparent text-white w-full outline-none px-2"
+                  className="bg-transparent text-white w-full outline-none px-2 no_scrollbar resize-none"
+                  onKeyDown={handleKeyDown}
                 />
               </div>
               <button
