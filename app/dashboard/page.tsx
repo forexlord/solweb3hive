@@ -38,6 +38,7 @@ import { BsChat } from "react-icons/bs";
 import Swal from "sweetalert2";
 
 import { Modal, Select, Form } from "antd";
+import { useChatStore } from "@/store/chat";
 
 const { Option } = Select;
 
@@ -59,6 +60,13 @@ const Dashboard = () => {
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const logout = useUserStore((state) => state.logout);
+
+  const setChats = useChatStore((state) => state.setChats);
+  const setMessages = useChatStore((state) => state.setMessages);
+  const setAnonymousMessages = useChatStore(
+    (state) => state.setAnonymousMessages
+  );
+
   const [isLoading, setIsLoading] = useState(true);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -76,6 +84,9 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     logout();
+    setChats([]);
+    setMessages([]);
+    setAnonymousMessages([]);
     router.push("/login");
   };
 

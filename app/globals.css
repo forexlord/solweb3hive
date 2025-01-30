@@ -26,6 +26,11 @@
   background-color: transparent !important;
 }
 
+.no_scrollbar::-webkit-scrollbar {
+  display: none;
+  /* background-color: red; */
+}
+
 @media (max-width: 768px) {
   .transform {
     transform: translateX(0);
