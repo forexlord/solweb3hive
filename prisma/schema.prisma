@@ -33,7 +33,7 @@ model Chat {
   updatedAt DateTime  @updatedAt @map(name: "updated_at")
   userId    String
   user      User      @relation(fields: [userId], references: [id])
-  messages  Message[]
+  messages  Message[] @relation(onDelete: Cascade)
 }
 
 model Message {

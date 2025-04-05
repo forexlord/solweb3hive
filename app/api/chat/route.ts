@@ -48,8 +48,14 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    // First delete all messages associated with the chat
+    await prisma.message.deleteMany({
+      where: { chatId: chatId }
+    });
+
+    // Then delete the chat
     await prisma.chat.delete({
-      where: { id: chatId },
+      where: { id: chatId }
     });
 
     return NextResponse.json({ message: "chat deleted successfully" });

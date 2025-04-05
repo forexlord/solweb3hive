@@ -1,152 +1,162 @@
-"use client"; // Enable client-side rendering
+"use client"
 
-import React from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
-import Swal from "sweetalert2";
-import { useFormik } from "formik";
-import { useUserStore } from "@/store/user";
-import * as Yup from "yup";
+import { useState } from "react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import Swal from "sweetalert2"
+import { useFormik } from "formik"
+import { useUserStore } from "@/store/user"
+import * as Yup from "yup"
+import { Eye, EyeOff, Check } from "lucide-react"
 
 const SignUp = () => {
-  const router = useRouter(); // Initialize router
+  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const setUser = useUserStore((state) => state.setUser)
+  const user = useUserStore((state) => state.user)
 
-  const setUser = useUserStore((state) => state.setUser);
-  const user = useUserStore((state) => state.user);
+  // Password validation schema with specific requirements
+  const passwordSchema = Yup.string()
+    .min(8, "Password must be at least 8 characters")
+    .matches(/[0-9]/, "Password requires at least one number")
+    .matches(/[A-Z]/, "Password requires at least one uppercase letter")
+    .matches(/[a-z]/, "Password requires at least one lowercase letter")
+    .matches(/[^A-Za-z0-9]/, "Password requires at least one special character")
+    .required("Password is required")
 
   const registerSchema = Yup.object().shape({
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email address is required"),
-    firstName: Yup.string().required("First Name is required"),
-    lastName: Yup.string().required("Last Name is required"),
-    password: Yup.string().required("Password is required"),
-    confirmPassword: Yup.string().required("Password is required"),
-    // phoneNumber: Yup.string().required("Phone Number is required"),
-  });
+    fullName: Yup.string().required("Full name is required"),
+    email: Yup.string().email("Invalid email address").required("Email address is required"),
+    password: passwordSchema,
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref('password')], "Passwords must match")
+      .required("Confirm password is required"),
+  })
 
   const formik = useFormik({
     initialValues: {
+      fullName: "",
       email: "",
-      firstName: "",
-      lastName: "",
       password: "",
       confirmPassword: "",
-      phoneNumber: "",
-      country: "Nigeria",
     },
     validationSchema: registerSchema,
     onSubmit: (values, { setSubmitting, resetForm }) => {
-      console.log(values);
-      if (values.password !== values.confirmPassword) {
-        Swal.fire({
-          title: "Error!",
-          text: "Passwords do not match",
-          icon: "error",
-          confirmButtonText: "Ok",
-        });
-        setSubmitting(false);
-        return;
+      // Extract first and last name from full name
+      const nameParts = values.fullName.trim().split(" ")
+      const firstName = nameParts[0] || ""
+      const lastName = nameParts.slice(1).join(" ") || ""
+
+      const userData = {
+        email: values.email,
+        firstName,
+        lastName,
+        password: values.password,
+        confirmPassword: values.password, // Using the same password
+        phoneNumber: "",
+        country: "Nigeria",
       }
 
       fetch("/api/register", {
         method: "POST",
-        body: JSON.stringify(values),
+        body: JSON.stringify(userData),
       })
         .then(async (res) => {
-          const data = await res.json();
+          const data = await res.json()
           if (res.ok) {
             Swal.fire({
               title: "Success!",
               text: `Registration Successful!`,
               icon: "success",
               confirmButtonText: "Ok",
-            });
-            console.log("data.user", data?.user);
-            setUser(data?.user);
-            router.push("/dashboard");
-            resetForm();
+            })
+            console.log("data.user", data?.user)
+            setUser(data?.user)
+            router.push("/dashboard")
+            resetForm()
           } else {
             Swal.fire({
               title: "Error!",
               text: data?.error || "Registration failed, please try again",
               icon: "error",
               confirmButtonText: "Ok",
-            });
+            })
           }
         })
         .finally(() => {
-          setSubmitting(false);
-        });
-      return;
+          setSubmitting(false)
+        })
     },
-  });
-  console.log("User>>", user);
+  })
+
+  // Check password strength
+  const hasMinLength = formik.values.password.length >= 8
+  const hasNumber = /[0-9]/.test(formik.values.password)
+  const hasUpperCase = /[A-Z]/.test(formik.values.password)
+  const hasLowerCase = /[a-z]/.test(formik.values.password)
+  const hasSpecialChar = /[^A-Za-z0-9]/.test(formik.values.password)
+
   if (user) {
-    router.push("/dashboard");
+    router.push("/dashboard")
   }
 
   return (
-    <div className="bg-[#202227] pt-20 h-screen w-full text-[20px] text-white flex flex-col items-center justify-center">
-      <div className="w-full max-w-[600px] px-4">
-        <p className="text-center pb-3 text-[24px] text-[#E1FF01]">
-          Sign Up for an Account
-        </p>
-        <p className="pb-5 text-center">
-          Let&apos;s get you all set up so you can experience Sol3Hive
-        </p>
+    <div className="bg-[#0F0F10] min-h-screen w-full flex flex-col items-center justify-center py-10">
+      <div className="w-full max-w-[450px] px-4">
+        <h1 className="text-white text-4xl font-bold text-center mb-2">Sign Up</h1>
+        <p className="text-center text-[#DCF331] mb-8">Join our community today!</p>
 
-        <form action="" className="flex flex-col gap-5">
-          {/* First Name and Last Name */}
-          <div className="flex flex-col md:flex-row gap-5 w-full justify-between">
-            <div className="flex flex-col gap-3">
-              <label htmlFor="firstName">First Name</label>
-              <input
-                type="text"
-                placeholder="First Name"
-                id="firstName"
-                className="bg-transparent border-[0.5px] w-full py-3 px-5 rounded-[8px] text-white"
-                name="firstName"
-                defaultValue={formik.values.firstName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                disabled={formik.isSubmitting}
-              />
-              {formik.touched.firstName && formik.errors.firstName ? (
-                <p className="text-red-500 text-sm">
-                  {formik.errors.firstName}
-                </p>
-              ) : null}
-            </div>
-            <div className="flex flex-col gap-3">
-              <label htmlFor="lastName">Last Name</label>
-              <input
-                type="text"
-                placeholder="Last Name"
-                id="lastName"
-                className="border-[0.5px] w-full py-3 px-5 rounded-[8px] text-white"
-                name="lastName"
-                defaultValue={formik.values.lastName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                disabled={formik.isSubmitting}
-              />
-              {formik.touched.lastName && formik.errors.lastName ? (
-                <p className="text-red-500 text-sm">{formik.errors.lastName}</p>
-              ) : null}
-            </div>
+        {/* Google Sign Up Button */}
+        <button
+          type="button"
+          className="flex items-center justify-center gap-2 bg-transparent border border-[#2A2B2F] text-white w-full py-3 rounded-md font-medium mb-6"
+        >
+          <Image src="/assets/googleIcon.png" alt="Google" width={20} height={20} />
+          Login with Google
+        </button>
+
+        {/* Divider */}
+        <div className="flex items-center my-6">
+          <div className="flex-grow h-px bg-[#2A2B2F]"></div>
+          <span className="px-4 text-sm text-[#DCF331]">Or Continue with</span>
+          <div className="flex-grow h-px bg-[#2A2B2F]"></div>
+        </div>
+
+        <form className="flex flex-col gap-5">
+          {/* Full Name Field */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="fullName" className="text-white text-sm">
+              Full Name
+            </label>
+            <input
+              type="text"
+              placeholder="Enter your Name"
+              id="fullName"
+              className="bg-[#1A1B1E] border border-[#2A2B2F] w-full py-4 px-5 rounded-md text-white box-border"
+              name="fullName"
+              value={formik.values.fullName}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
+            />
+            {formik.touched.fullName && formik.errors.fullName ? (
+              <p className="text-red-500 text-sm">{formik.errors.fullName}</p>
+            ) : null}
           </div>
 
-          {/* Email */}
-          <div className="flex flex-col gap-3">
-            <label htmlFor="email">Email</label>
+          {/* Email Field */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="email" className="text-white text-sm">
+              Email
+            </label>
             <input
               type="email"
-              placeholder="example@example.com"
+              placeholder="Enter your Email"
               id="email"
-              className="bg-transparent border-[0.5px] w-full py-3 px-5 rounded-[8px] text-white"
+              className="bg-[#1A1B1E] border border-[#2A2B2F] w-full py-4 px-5 rounded-md text-white box-border"
               name="email"
-              defaultValue={formik.values.email}
+              value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled={formik.isSubmitting}
@@ -156,86 +166,139 @@ const SignUp = () => {
             ) : null}
           </div>
 
-          {/* Password and Confirm Password */}
-          <div className="flex flex-col md:flex-row gap-5 w-full justify-between">
-            <div className="flex flex-col gap-3">
-              <label htmlFor="password">Password</label>
+          {/* Password Field */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="password" className="text-white text-sm">
+              Password
+            </label>
+            <div className="relative">
               <input
-                type="password"
-                placeholder="Password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your Password"
                 id="password"
-                className="bg-transparent border-[0.5px] w-full py-3 px-5 rounded-[8px] text-white"
+                className="bg-[#1A1B1E] border border-[#2A2B2F] w-full py-4 px-5 rounded-md text-white box-border"
                 name="password"
-                defaultValue={formik.values.password}
+                value={formik.values.password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 disabled={formik.isSubmitting}
               />
-              {formik.touched.password && formik.errors.password ? (
-                <p className="text-red-500 text-sm">{formik.errors.password}</p>
-              ) : null}
+              <button
+                type="button"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
-            <div className="flex flex-col gap-3">
-              <label htmlFor="confirmPassword">Confirm Password</label>
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                id="confirmPassword"
-                className="bg-transparent border-[0.5px] w-full py-3 px-5 rounded-[8px] text-white"
-                name="confirmPassword"
-                defaultValue={formik.values.confirmPassword}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                disabled={formik.isSubmitting}
-              />
-              {formik.touched.confirmPassword &&
-              formik.errors.confirmPassword ? (
-                <p className="text-red-500 text-sm">
-                  {formik.errors.confirmPassword}
-                </p>
-              ) : null}
-            </div>
+            {formik.touched.password && formik.errors.password ? (
+              <p className="text-red-500 text-sm">{formik.errors.password}</p>
+            ) : null}
           </div>
 
-          {/* Forgot Password */}
-          <div className="flex justify-end py-5">
-            <p className="underline underline-offset-2 text-[#F4F5F7]">
-              <a href="">Forgot Password</a>
-            </p>
+          {/* Confirm Password Field */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="confirmPassword" className="text-white text-sm">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your Password"
+                id="confirmPassword"
+                className="bg-[#1A1B1E] border border-[#2A2B2F] w-full py-4 px-5 rounded-md text-white box-border"
+                name="confirmPassword"
+                value={formik.values.confirmPassword}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                disabled={formik.isSubmitting}
+              />
+              <button
+                type="button"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
+              <p className="text-red-500 text-sm">{formik.errors.confirmPassword}</p>
+            ) : null}
+          </div>
+
+          {/* Password Requirements */}
+          <div className="grid grid-cols-2 gap-3 mt-2">
+            <div className="flex items-center gap-2">
+              <div
+                className={`rounded-full p-1 ${hasMinLength ? "bg-[#DCF331] text-black" : "bg-[#2A2B2F] text-gray-400"}`}
+              >
+                <Check size={14} />
+              </div>
+              <span className="text-sm text-gray-300">Min 8 Characters</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`rounded-full p-1 ${hasNumber ? "bg-[#DCF331] text-black" : "bg-[#2A2B2F] text-gray-400"}`}
+              >
+                <Check size={14} />
+              </div>
+              <span className="text-sm text-gray-300">One Numeric Character</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`rounded-full p-1 ${hasUpperCase ? "bg-[#DCF331] text-black" : "bg-[#2A2B2F] text-gray-400"}`}
+              >
+                <Check size={14} />
+              </div>
+              <span className="text-sm text-gray-300">One Upper Case Character</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`rounded-full p-1 ${hasSpecialChar ? "bg-[#DCF331] text-black" : "bg-[#2A2B2F] text-gray-400"}`}
+              >
+                <Check size={14} />
+              </div>
+              <span className="text-sm text-gray-300">One Special Character</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`rounded-full p-1 ${hasLowerCase ? "bg-[#DCF331] text-black" : "bg-[#2A2B2F] text-gray-400"}`}
+              >
+                <Check size={14} />
+              </div>
+              <span className="text-sm text-gray-300">One Lower Case Character</span>
+            </div>
           </div>
 
           {/* Sign Up Button */}
-          <div>
-            <button
-              type="submit"
-              className="bg-[#DCF331] text-black w-full p-3 rounded-[8px]"
-              onClick={() => formik.handleSubmit()}
-              disabled={formik.isSubmitting}
-            >
-              Sign Up
-            </button>
-          </div>
-
-          {/* Social Login Icons */}
-          <div className="flex gap-3 items-center justify-center pt-5">
-            <Image src="/assets/Frame 106.svg" alt="" width={50} height={50} />
-            <Image src="/assets/Frame 107.svg" alt="" width={50} height={50} />
-            <Image src="/assets/Frame 108.svg" alt="" width={50} height={50} />
-          </div>
+          <button
+            type="submit"
+            className="bg-[#DCF331] text-black w-full py-4 rounded-md font-medium mt-4"
+            onClick={(e) => {
+              e.preventDefault()
+              formik.handleSubmit()
+            }}
+            disabled={formik.isSubmitting}
+          >
+            Sign Up
+          </button>
 
           {/* Already have an account */}
-          <div className="flex justify-end pt-5 pb-10">
-            <p
-              className="underline underline-offset-2 text-[#F4F5F7] cursor-pointer"
-              onClick={() => router.push("/login")} // Use router.push to navigate to login
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <p className="text-white text-sm">Already have an account?</p>
+            <button
+              type="button"
+              className="text-[#DCF331] font-medium flex items-center text-sm"
+              onClick={() => router.push("/login")}
             >
-              Already have an account? Login
-            </p>
+              Login <span className="ml-1">↗</span>
+            </button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SignUp;
+export default SignUp
+

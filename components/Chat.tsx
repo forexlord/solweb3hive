@@ -7,6 +7,11 @@ import { Drawer, Spin } from "antd";
 import { MdDelete, MdMenu } from "react-icons/md";
 import { CgClose } from "react-icons/cg";
 import Swal from "sweetalert2";
+import { Home } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+// Add a custom font class for the chat
+const chatFontClass = "font-['Inter',sans-serif]";
 
 const ChatPage = () => {
   const user = useUserStore((state) => state.user);
@@ -17,7 +22,7 @@ const ChatPage = () => {
   const addMessage = useChatStore((state) => state.addMessage);
   const messages = useChatStore((state) => state.messages);
   const [isLoading, setIsLoading] = useState(false);
-
+  const router = useRouter();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const [selectedChat, setSelectedChat] = useState<IChat | null>(null);
@@ -25,6 +30,8 @@ const ChatPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -70,6 +77,9 @@ const ChatPage = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (prompt.trim() === "") {
+      return;
+    }
     e.preventDefault();
     setLoading(true);
 
@@ -86,6 +96,7 @@ const ChatPage = () => {
         updatedAt: new Date().toISOString(),
         chatId: chatId || "",
       });
+      setPrompt("");
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       const res = await fetch("/api/prompt", {
         method: "POST",
@@ -178,6 +189,29 @@ const ChatPage = () => {
     });
   };
 
+  // Add this function to auto-resize the textarea
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  // Update the prompt state and adjust height
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(e.target.value);
+    adjustTextareaHeight();
+  };
+
+  // Handle key press for Enter to submit
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e as unknown as React.FormEvent);
+    }
+  };
+
   return (
     <Spin spinning={isLoading}>
       <div className="bg-black h-screen w-full flex flex-row items-center justify-center text-white">
@@ -198,7 +232,7 @@ const ChatPage = () => {
               <div
                 key={index}
                 className={`mb-2 border border-[#262626] text-white p-3 rounded-lg flex justify-between items-center ${
-                  selectedChat?.id === chat.id
+                  selectedChat?.id === chat?.id
                     ? "bg-[#262626]"
                     : "!text-[#262626] bg-white"
                 }  cursor-pointer hover:bg-[#171717] hover:!text-white transition-all`}
@@ -207,7 +241,7 @@ const ChatPage = () => {
                   setMessages(chat?.messages || []);
                 }}
               >
-                <p>{chat.messages?.[0]?.content || "Default"}</p>
+                <p>{chat?.messages?.[0]?.content || "Default"}</p>
                 <span
                   className="text-red-500"
                   onClick={() => handleDeleteChat(chat?.id as string)}
@@ -242,21 +276,9 @@ const ChatPage = () => {
           </div>
 
           <div className="flex flex-col">
-            <button className="mb-4" onClick={hideSidebar}>
-              <Image
-                src="/assets/help_svgrepo.com.png"
-                alt="help"
-                width={30}
-                height={30}
-              />
-            </button>
-            <button className="mb-4" onClick={hideSidebar}>
-              <Image
-                src="/assets/update-round_svgrepo.com.png"
-                alt="updateround"
-                width={30}
-                height={30}
-              />
+           
+            <button className="mb-4" onClick={() => router.push("/")}>
+              <Home size={30} />
             </button>
             <button className="mb-4" onClick={hideSidebar}>
               <Image
@@ -307,9 +329,21 @@ const ChatPage = () => {
                       message.type === "prompt"
                         ? "bg-[#F4F5F7] text-black w-[50%] self-end"
                         : "bg-[#E1FF01] text-black w-[50%] self-start"
-                    } p-5 rounded-lg`}
+                    } p-5 rounded-lg ${chatFontClass}`}
                   >
-                    <p>{message.content}</p>
+                    {message.type === "prompt" ? (
+                      <p className="text-[15px] leading-relaxed">{message.content}</p>
+                    ) : (
+                      <div className="whitespace-pre-line text-[15px] leading-relaxed">
+                        {message.content.split('**').map((part, i) => {
+                          // Check if this part should be highlighted (every other part after splitting by **)
+                          if (i % 2 === 1) {
+                            return <span key={i} className="font-bold">{part}</span>;
+                          }
+                          return <span key={i}>{part}</span>;
+                        })}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -317,23 +351,25 @@ const ChatPage = () => {
             </div>
 
             <div className="flex items-center justify-between p-4 rounded-lg border border-[#F4F5F7]">
-              <div className="flex items-center">
+              <div className="flex items-center w-full">
                 <Image
                   src="/assets/emoji-smile_svgrepo.com.png"
                   alt="emoji"
                   width={30}
                   height={30}
                 />
-                <input
-                  type="text"
+                <textarea
+                  ref={textareaRef}
                   placeholder="Enter Prompt"
                   value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="bg-transparent text-white w-full outline-none px-2"
+                  onChange={handlePromptChange}
+                  onKeyDown={handleKeyDown}
+                  className={`bg-transparent text-white w-full outline-none px-2 ${chatFontClass} text-[15px] resize-none min-h-[40px] max-h-[200px] overflow-y-auto`}
+                  rows={1}
                 />
               </div>
               <button
-                className="bg-[#E1FF01] text-black px-6 py-2 rounded-lg flex items-center gap-2"
+                className="bg-[#E1FF01] text-black px-6 py-2 rounded-lg flex items-center gap-2 ml-2 font-medium"
                 onClick={handleSubmit}
               >
                 {loading ? "Loading..." : "Send"}
